@@ -137,23 +137,27 @@ def run(context: dict) -> dict:
     sentiment_data = context.get("sentiment_data", {})
     risk_data = context.get("risk_data", {})
 
+    def _safe(text: str) -> str:
+        """Escape curly braces in dynamic content so .format() doesn't choke."""
+        return str(text).replace("{", "{{").replace("}", "}}")
+
     user_message = _USER_TEMPLATE.format(
         overall_sentiment=sentiment_data.get("overall_market_sentiment", "neutral"),
         overall_confidence=sentiment_data.get("overall_confidence", 50),
-        analyst_note=sentiment_data.get("analyst_note", ""),
-        sector_sentiment=_format_sector_sentiment(sentiment_data.get("sector_sentiment", [])),
-        watchlist_prices=_format_watchlist_prices(market_data.get("watchlist", [])),
-        ticker_news=_format_ticker_news(news_data.get("watchlist_news", {})),
-        reddit_mentions=_format_reddit_mentions(
+        analyst_note=_safe(sentiment_data.get("analyst_note", "")),
+        sector_sentiment=_safe(_format_sector_sentiment(sentiment_data.get("sector_sentiment", []))),
+        watchlist_prices=_safe(_format_watchlist_prices(market_data.get("watchlist", []))),
+        ticker_news=_safe(_format_ticker_news(news_data.get("watchlist_news", {}))),
+        reddit_mentions=_safe(_format_reddit_mentions(
             reddit_data.get("trending_tickers", []), config.TICKERS
-        ),
-        risk_alerts=_format_risk_alerts(risk_data.get("risk_alerts", [])),
+        )),
+        risk_alerts=_safe(_format_risk_alerts(risk_data.get("risk_alerts", []))),
         tickers=", ".join(config.TICKERS),
     )
 
     response = client.messages.create(
         model=config.ANALYST_MODEL,
-        max_tokens=2500,
+        max_tokens=4096,
         system=_SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}],
     )

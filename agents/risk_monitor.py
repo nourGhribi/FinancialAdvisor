@@ -25,10 +25,19 @@ _RISK_KEYWORDS = [
 ]
 
 
+_ETF_PREFIXES = {"SPY", "QQQ", "DIA", "IWM", "VTI", "XL"}
+
+
+def _is_etf(symbol: str) -> bool:
+    return symbol in _ETF_PREFIXES or symbol.startswith("XL")
+
+
 def _fetch_earnings_calendar() -> list[dict]:
-    """Fetch upcoming earnings for watchlist tickers via yfinance."""
+    """Fetch upcoming earnings for watchlist tickers via yfinance (skips ETFs)."""
     events = []
     for ticker in config.TICKERS:
+        if _is_etf(ticker):
+            continue
         try:
             t = yf.Ticker(ticker)
             cal = t.calendar

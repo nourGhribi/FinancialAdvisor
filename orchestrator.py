@@ -2,8 +2,10 @@
 Orchestrator — coordinates all agents in sequence and delivers the briefing.
 
 Usage:
-    python orchestrator.py          # run one briefing now
-    python orchestrator.py --dry    # run without sending email (prints summary)
+    python orchestrator.py              # run one briefing now
+    python orchestrator.py --dry        # run without sending email (prints summary)
+    python orchestrator.py --no-reddit  # skip Reddit (use while API is pending)
+    python orchestrator.py --dry --no-reddit
 """
 import argparse
 import concurrent.futures
@@ -32,7 +34,14 @@ logging.basicConfig(
 log = logging.getLogger("orchestrator")
 
 
-def run_briefing(dry_run: bool = False) -> None:
+_EMPTY_REDDIT = {
+    "trending_tickers": [],
+    "top_posts": [],
+    "subreddit_summary": {},
+}
+
+
+def run_briefing(dry_run: bool = False, no_reddit: bool = False) -> None:
     tz = pytz.timezone(config.TIMEZONE)
     now = datetime.now(tz=tz)
     log.info("=== Starting briefing run at %s ===", now.strftime("%Y-%m-%d %H:%M %Z"))
@@ -41,6 +50,10 @@ def run_briefing(dry_run: bool = False) -> None:
 
     # ── Phase 1: Collect data in parallel ───────────────────────────────────
     log.info("Phase 1 — collecting data (parallel)...")
+
+    if no_reddit:
+        log.info("  [RedditScout] SKIPPED (--no-reddit)")
+        context["reddit_data"] = _EMPTY_REDDIT
 
     def run_reddit():
         log.info("  [RedditScout] fetching Reddit data...")
@@ -54,12 +67,9 @@ def run_briefing(dry_run: bool = False) -> None:
         log.info("  [NewsHarvester] fetching news feeds...")
         return "news_data", news_harvester.run(context)
 
+    jobs = [run_market, run_news] if no_reddit else [run_reddit, run_market, run_news]
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        futures = [
-            executor.submit(run_reddit),
-            executor.submit(run_market),
-            executor.submit(run_news),
-        ]
+        futures = [executor.submit(fn) for fn in jobs]
         for future in concurrent.futures.as_completed(futures):
             try:
                 key, result = future.result()
@@ -149,8 +159,9 @@ def run_briefing(dry_run: bool = False) -> None:
 def main():
     parser = argparse.ArgumentParser(description="Financial Advisor Orchestrator")
     parser.add_argument("--dry", action="store_true", help="Render HTML only, do not send email")
+    parser.add_argument("--no-reddit", action="store_true", help="Skip Reddit data (use while API approval is pending)")
     args = parser.parse_args()
-    run_briefing(dry_run=args.dry)
+    run_briefing(dry_run=args.dry, no_reddit=args.no_reddit)
 
 
 if __name__ == "__main__":

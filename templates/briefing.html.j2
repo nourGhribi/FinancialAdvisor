@@ -47,11 +47,6 @@
   .badge-bullish { background: #0e3a1d; color: #3fb950; border: 1px solid #238636; }
   .badge-neutral  { background: #2d2a00; color: #d29922; border: 1px solid #9e6a03; }
   .badge-bearish  { background: #3d0c0c; color: #f85149; border: 1px solid #da3633; }
-  .confidence-bar-wrap { width: 80px; height: 6px; background: #21262d; border-radius: 3px; margin-left: 10px; }
-  .confidence-bar { height: 6px; border-radius: 3px; }
-  .bar-bullish { background: #3fb950; }
-  .bar-neutral  { background: #d29922; }
-  .bar-bearish  { background: #f85149; }
   .rationale { font-size: 12px; color: #8b949e; margin-top: 4px; }
 
   /* Reddit pulse */
@@ -169,14 +164,9 @@
         <div class="sector-name">{{ s.sector }}</div>
         <div class="rationale">{{ s.rationale }}</div>
       </div>
-      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+      <div style="flex-shrink:0; text-align:right;">
         <span class="sector-badge badge-{{ s.sentiment }}">{{ s.sentiment }}</span>
-        <div>
-          <div class="confidence-bar-wrap">
-            <div class="confidence-bar bar-{{ s.sentiment }}" style="width:{{ s.confidence }}%"></div>
-          </div>
-          <div style="font-size:10px; color:#484f58; text-align:right;">{{ s.confidence }}%</div>
-        </div>
+        <div style="font-size:11px; color:#8b949e; margin-top:4px;">{{ s.confidence }}% confidence</div>
       </div>
     </div>
     {% endfor %}
@@ -278,7 +268,10 @@
         {% if article.url %}<a href="{{ article.url }}" style="color:#58a6ff; text-decoration:none;">{{ article.title }}</a>
         {% else %}{{ article.title }}{% endif %}
       </div>
-      <div class="news-meta">{{ article.source }}</div>
+      {% if article.summary %}
+      <div style="font-size:12px; color:#8b949e; margin-top:3px; line-height:1.4;">{{ article.summary }}</div>
+      {% endif %}
+      <div class="news-meta" style="margin-top:3px;">{{ article.source }}</div>
     </div>
     {% endfor %}
   </div>
