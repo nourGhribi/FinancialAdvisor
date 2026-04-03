@@ -1,0 +1,24 @@
+{
+  "tickers": [
+    "AAPL", "MSFT", "NVDA", "GOOGL", "META",
+    "AMZN", "TSLA", "AMD", "PLTR", "SPY"
+  ],
+  "sectors": {
+    "Technology": ["XLK", "AAPL", "MSFT", "NVDA", "GOOGL", "META", "AMD"],
+    "Consumer Discretionary": ["XLY", "AMZN", "TSLA"],
+    "Financials": ["XLF", "JPM", "BAC"],
+    "Healthcare": ["XLV", "JNJ", "UNH"],
+    "Energy": ["XLE", "XOM", "CVX"],
+    "Industrials": ["XLI", "BA", "CAT"],
+    "Utilities": ["XLU"],
+    "Real Estate": ["XLRE"]
+  },
+  "subreddits": [
+    "investing",
+    "stocks",
+    "wallstreetbets",
+    "StockMarket",
+    "options"
+  ],
+  "indices": ["^GSPC", "^IXIC", "^DJI", "^VIX"]
+}

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ edition }} Briefing — {{ date }}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+         background: #0d1117; color: #e6edf3; font-size: 14px; line-height: 1.6; }
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #1f2937, #111827);
+            border: 1px solid #30363d; border-radius: 12px;
+            padding: 24px; margin-bottom: 20px; text-align: center; }
+  .header-badge { display: inline-block; background: #238636; color: #fff;
+                  font-size: 11px; font-weight: 700; padding: 3px 10px;
+                  border-radius: 20px; letter-spacing: 1px; margin-bottom: 10px; }
+  .header h1 { font-size: 26px; font-weight: 700; color: #f0f6fc; }
+  .header .subtitle { color: #8b949e; font-size: 13px; margin-top: 6px; }
+
+  /* Section */
+  .section { background: #161b22; border: 1px solid #30363d;
+             border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px;
+                   color: #8b949e; text-transform: uppercase; margin-bottom: 14px;
+                   padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+
+  /* Market overview */
+  .index-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .index-card { background: #0d1117; border: 1px solid #21262d; border-radius: 8px; padding: 12px; }
+  .index-name { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+  .index-price { font-size: 18px; font-weight: 700; color: #f0f6fc; }
+  .index-change { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .up { color: #3fb950; }
+  .down { color: #f85149; }
+  .flat { color: #8b949e; }
+
+  /* Sector sentiment */
+  .sector-row { display: flex; align-items: center; justify-content: space-between;
+                padding: 10px 0; border-bottom: 1px solid #21262d; }
+  .sector-row:last-child { border-bottom: none; }
+  .sector-name { font-weight: 600; color: #e6edf3; min-width: 160px; }
+  .sector-badge { display: inline-block; font-size: 11px; font-weight: 700;
+                  padding: 2px 10px; border-radius: 12px; text-transform: uppercase; }
+  .badge-bullish { background: #0e3a1d; color: #3fb950; border: 1px solid #238636; }
+  .badge-neutral  { background: #2d2a00; color: #d29922; border: 1px solid #9e6a03; }
+  .badge-bearish  { background: #3d0c0c; color: #f85149; border: 1px solid #da3633; }
+  .confidence-bar-wrap { width: 80px; height: 6px; background: #21262d; border-radius: 3px; margin-left: 10px; }
+  .confidence-bar { height: 6px; border-radius: 3px; }
+  .bar-bullish { background: #3fb950; }
+  .bar-neutral  { background: #d29922; }
+  .bar-bearish  { background: #f85149; }
+  .rationale { font-size: 12px; color: #8b949e; margin-top: 4px; }
+
+  /* Reddit pulse */
+  .reddit-item { display: flex; align-items: center; gap: 10px;
+                 padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .reddit-item:last-child { border-bottom: none; }
+  .reddit-rank { font-size: 11px; color: #8b949e; min-width: 24px; font-weight: 700; }
+  .reddit-ticker { font-size: 15px; font-weight: 700; color: #58a6ff; min-width: 60px; }
+  .reddit-mentions { font-size: 12px; color: #8b949e; }
+  .reddit-sentiment { margin-left: auto; }
+
+  /* Risk alerts */
+  .risk-item { display: flex; align-items: flex-start; gap: 10px;
+               padding: 10px 12px; background: #21262d; border-radius: 8px;
+               margin-bottom: 8px; border-left: 3px solid #9e6a03; }
+  .risk-item.vix { border-left-color: #f85149; }
+  .risk-item.earnings { border-left-color: #58a6ff; }
+  .risk-icon { font-size: 16px; }
+  .risk-text { font-size: 13px; color: #e6edf3; }
+  .risk-source { font-size: 11px; color: #8b949e; margin-top: 2px; }
+
+  /* Signals */
+  .signal-card { background: #0d1117; border: 1px solid #21262d;
+                 border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+  .signal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .signal-ticker { font-size: 18px; font-weight: 800; color: #f0f6fc; }
+  .signal-price { font-size: 14px; color: #8b949e; }
+  .signal-badge { font-size: 12px; font-weight: 700; padding: 3px 12px;
+                  border-radius: 20px; text-transform: uppercase; margin-left: auto; }
+  .signal-BUY  { background: #0e3a1d; color: #3fb950; border: 1px solid #238636; }
+  .signal-SELL { background: #3d0c0c; color: #f85149; border: 1px solid #da3633; }
+  .signal-HOLD { background: #2d2a00; color: #d29922; border: 1px solid #9e6a03; }
+  .signal-AVOID{ background: #1c1c2e; color: #8b949e; border: 1px solid #30363d; }
+  .signal-reasoning { font-size: 13px; color: #c9d1d9; line-height: 1.5; }
+  .signal-meta { display: flex; gap: 16px; margin-top: 8px; }
+  .signal-conviction { font-size: 11px; color: #8b949e; }
+  .signal-horizon { font-size: 11px; color: #8b949e; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 12px; }
+  .tag-catalyst { background: #0e3a1d; color: #3fb950; }
+  .tag-risk { background: #3d0c0c; color: #f85149; }
+
+  /* Top pick */
+  .top-pick { background: linear-gradient(135deg, #0e3a1d, #0d1117);
+              border: 1px solid #238636; border-radius: 10px; padding: 16px;
+              margin-bottom: 16px; }
+  .top-pick-label { font-size: 11px; font-weight: 700; color: #3fb950;
+                    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .top-pick-ticker { font-size: 28px; font-weight: 800; color: #3fb950; }
+
+  /* News */
+  .news-item { padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .news-item:last-child { border-bottom: none; }
+  .news-title { font-size: 13px; color: #c9d1d9; }
+  .news-meta { font-size: 11px; color: #8b949e; margin-top: 2px; }
+
+  /* Footer */
+  .footer { text-align: center; color: #484f58; font-size: 11px; padding: 20px 0; }
+  .disclaimer { background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+                padding: 12px; margin-bottom: 16px; font-size: 11px; color: #6e7681; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">{{ edition | upper }} BRIEFING</div>
+    <h1>Financial Intelligence Report</h1>
+    <div class="subtitle">{{ date }} &nbsp;|&nbsp; {{ time }} {{ timezone }}</div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    This report is AI-generated for informational purposes only and does not constitute financial advice.
+    Always conduct your own research and consult a licensed financial advisor before investing.
+  </div>
+
+  <!-- MARKET OVERVIEW -->
+  <div class="section">
+    <div class="section-title">Market Overview</div>
+    <div class="index-grid">
+      {% for name, data in indices.items() %}
+      <div class="index-card">
+        <div class="index-name">{{ name }}</div>
+        {% if data.get('error') %}
+          <div class="index-price">N/A</div>
+        {% else %}
+          <div class="index-price">${{ "%.2f"|format(data.price) }}</div>
+          <div class="index-change {% if data.pct_change_1d > 0 %}up{% elif data.pct_change_1d < 0 %}down{% else %}flat{% endif %}">
+            {{ "%+.2f"|format(data.pct_change_1d) }}%
+          </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% if market_mood %}
+    <div style="margin-top:14px; font-size:13px; color:#8b949e;">
+      Overall mood: <strong style="color:{% if market_mood == 'bullish' %}#3fb950{% elif market_mood == 'bearish' %}#f85149{% else %}#d29922{% endif %}">
+        {{ market_mood | upper }}
+      </strong>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- SECTOR SENTIMENT -->
+  <div class="section">
+    <div class="section-title">Sector Sentiment</div>
+    {% if analyst_note %}
+    <p style="font-size:13px; color:#8b949e; margin-bottom:14px; font-style:italic;">{{ analyst_note }}</p>
+    {% endif %}
+    {% for s in sector_sentiment %}
+    <div class="sector-row">
+      <div>
+        <div class="sector-name">{{ s.sector }}</div>
+        <div class="rationale">{{ s.rationale }}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+        <span class="sector-badge badge-{{ s.sentiment }}">{{ s.sentiment }}</span>
+        <div>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-bar bar-{{ s.sentiment }}" style="width:{{ s.confidence }}%"></div>
+          </div>
+          <div style="font-size:10px; color:#484f58; text-align:right;">{{ s.confidence }}%</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- REDDIT PULSE -->
+  <div class="section">
+    <div class="section-title">Reddit Pulse — r/investing &bull; r/stocks &bull; r/wallstreetbets</div>
+    {% for item in trending_tickers %}
+    <div class="reddit-item">
+      <span class="reddit-rank">#{{ loop.index }}</span>
+      <span class="reddit-ticker">{{ item.ticker }}</span>
+      <span class="reddit-mentions">{{ item.mentions }} mentions</span>
+      <span class="reddit-sentiment">
+        {% if item.sentiment_score > 0.1 %}
+          <span class="sector-badge badge-bullish" style="font-size:10px;">BULLISH</span>
+        {% elif item.sentiment_score < -0.1 %}
+          <span class="sector-badge badge-bearish" style="font-size:10px;">BEARISH</span>
+        {% else %}
+          <span class="sector-badge badge-neutral" style="font-size:10px;">NEUTRAL</span>
+        {% endif %}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- RISK ALERTS -->
+  {% if risk_alerts %}
+  <div class="section">
+    <div class="section-title">Risk Alerts</div>
+    {% for alert in risk_alerts %}
+      {% if alert.type in ['vix_extreme_fear', 'vix_elevated'] %}
+      <div class="risk-item vix">
+        <span class="risk-icon">⚡</span>
+        <div><div class="risk-text">{{ alert.description }}</div></div>
+      </div>
+      {% elif alert.type == 'earnings' %}
+      <div class="risk-item earnings">
+        <span class="risk-icon">📅</span>
+        <div><div class="risk-text">{{ alert.description }} — {{ alert.date }}</div></div>
+      </div>
+      {% elif alert.type == 'news_risk' %}
+      <div class="risk-item">
+        <span class="risk-icon">⚠️</span>
+        <div>
+          <div class="risk-text">{{ alert.title }}</div>
+          <div class="risk-source">{{ alert.source }}</div>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- TOP PICK -->
+  {% if top_pick %}
+  <div class="top-pick">
+    <div class="top-pick-label">Today's Top Pick</div>
+    <div class="top-pick-ticker">{{ top_pick }}</div>
+  </div>
+  {% endif %}
+
+  <!-- WATCHLIST SIGNALS -->
+  <div class="section">
+    <div class="section-title">Watchlist Signals</div>
+    {% if portfolio_notes %}
+    <p style="font-size:13px; color:#8b949e; margin-bottom:14px; font-style:italic;">{{ portfolio_notes }}</p>
+    {% endif %}
+    {% for sig in signals %}
+    <div class="signal-card">
+      <div class="signal-header">
+        <span class="signal-ticker">{{ sig.ticker }}</span>
+        <span class="signal-price">${{ "%.2f"|format(sig.price) }}</span>
+        <span class="signal-badge signal-{{ sig.signal }}">{{ sig.signal }}</span>
+      </div>
+      <div class="signal-reasoning">{{ sig.reasoning }}</div>
+      <div class="signal-meta">
+        <span class="signal-conviction">Conviction: {{ sig.conviction | upper }}</span>
+        <span class="signal-horizon">{{ sig.time_horizon }}</span>
+      </div>
+      <div class="tag-list">
+        {% for c in sig.catalysts %}
+          <span class="tag tag-catalyst">+ {{ c }}</span>
+        {% endfor %}
+        {% for r in sig.risks %}
+          <span class="tag tag-risk">- {{ r }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- TOP NEWS -->
+  <div class="section">
+    <div class="section-title">Top Headlines</div>
+    {% for article in macro_headlines[:10] %}
+    <div class="news-item">
+      <div class="news-title">
+        {% if article.url %}<a href="{{ article.url }}" style="color:#58a6ff; text-decoration:none;">{{ article.title }}</a>
+        {% else %}{{ article.title }}{% endif %}
+      </div>
+      <div class="news-meta">{{ article.source }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    Generated by FinancialAdvisor AI &nbsp;&bull;&nbsp; {{ date }} {{ time }}<br>
+    Powered by Claude (Anthropic) &bull; Data: Yahoo Finance, Reddit, Reuters
+  </div>
+
+</div>
+</body>
+</html>
